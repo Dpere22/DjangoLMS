@@ -5,71 +5,74 @@
 <link rel="stylesheet" href="/static/main.css">
 <title>Submissions</title>
 
-<header>
-    <h1>
-        CS 3550
-    </h1>
-    <nav>
-        <a href="index.html">Assignments </a>
-        <a href="profile.html">Profile</a>
-    </nav>
-</header>
+<nav>
+    <div class="nav-content">
+        <div class="left-side">
+            <h1>
+            CS 3550
+            </h1>
+            <a href="index.html">Assignments </a>
+        </div>
+        <div class="right-side">
+            <a class = "profile" href="profile.html">Profile</a>
+        </div>
+    </div>
+</nav>
 <main>
-    <h1>
-        Homework 1 (HTML)
-    </h1>
-    <p>
-        All grades out of 100
-    </p>
-
-    <table>
-        <thead>
-            <tr>
-                <th>
-                    Student
-                </th>
-                <th>
-                    Submission
-                </th>
-                <th>
-                    Grade
-                </th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <td>
-                    <label for="s1">s1</label>
-                </td>
-                <td>
-                    <a href="#">Submission</a>
-                </td>
-                <td>
-                    <form>
-                        <input type="number" id="s1">
-                    </form>
-                </td>
-            </tr>
-            <tr>
-                <td>
-                    <label for="s2">s2</label>
-                </td>
-                <td>
-                    <a href="#">Submission</a>
-                </td>
-                <td>
-                    <form>
-                        <label>
-                            <input type="number" id="s2">
-                        </label>
-                    </form>
-                </td>
-            </tr>
-        </tbody>
-    </table>
-    <form>
-        <button type = "submit" class="SubmitButton">Submit</button>
-        <a href="assignment.html">Back to assignment</a>
-    </form>
+    <div class="page-content">
+        <div class = "title">
+            <h1> Homework 1 (HTML) </h1>
+            <h2> All grades out of 100 </h2>
+        </div>
+        <table>
+            <thead>
+                <tr>
+                    <th>
+                        Student
+                    </th>
+                    <th>
+                        Submission
+                    </th>
+                    <th>
+                        Grade
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>
+                        <label for="s1">s1</label>
+                    </td>
+                    <td>
+                        <a href="#">Submission</a>
+                    </td>
+                    <td>
+                        <form>
+                            <input type="number" id="s1">
+                        </form>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <label for="s2">s2</label>
+                    </td>
+                    <td>
+                        <a href="#">Submission</a>
+                    </td>
+                    <td>
+                        <form>
+                            <label>
+                                <input type="number" id="s2">
+                            </label>
+                        </form>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <form>
+            <button type = "submit" class="SubmitButton">Submit</button>
+            <a href="assignment.html">Back to assignment</a>
+        </form>
+    </div>
 </main>
 
