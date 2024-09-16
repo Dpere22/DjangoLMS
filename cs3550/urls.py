@@ -1,3 +1,4 @@
+from grades import views
 """
 URL configuration for cs3550 project.
 
@@ -19,4 +20,9 @@ from django.urls import path
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path("", views.index),
+    path("<int:assignment_id>/", views.assignment),
+    path("<int:assignment_id>/submissions", views.submissions),
+    path("profile/", views.profile),
+    path("profile/login", views.login_form),
 ]
