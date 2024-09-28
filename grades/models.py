@@ -21,6 +21,3 @@ class Submission(models.Model):
     grader = models.ForeignKey(User, on_delete=models.SET_NULL, related_name='graded_set', null=True)
     score = models.FloatField(validators=[is_positive], null = True, blank = True)
     file = models.FileField()
-
-
-# Create your models here.

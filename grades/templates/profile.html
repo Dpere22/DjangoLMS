@@ -3,21 +3,7 @@
 <meta charset="utf-8">
 <link rel="icon" href="../../static/favicon.ico">
 <link rel="stylesheet" href="/static/main.css">
-<title>Profile</title>
-
-<nav>
-    <div class="nav-content">
-        <div class="left-side">
-            <h1>
-            CS 3550
-            </h1>
-            <a href="index.html">Assignments </a>
-        </div>
-        <div class="right-side">
-            <a class = "profile" href="profile.html">Profile</a>
-        </div>
-    </div>
-</nav>
+{% include "header.html" with title="Profile" %}
 <main>
     <div class="page-content">
         <div class = "title">
@@ -25,7 +11,7 @@
         </div>
         <div class="login-action-box">
             Currently logged in as ta1.
-            <a href="login.html" role="button">Log out</a>
+            <a href="/profile/login" role="button">Log out</a>
         </div>
 
         <table>
@@ -36,62 +22,16 @@
                 </tr>
             </thead>
             <tbody>
-                <tr>
-                    <td>
-                        <a href="">GitHub username</a>
-                    </td>
-                    <td class = "num-right-align">
-                        2/3
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        <a href="assignment.html">Homework 1 (HTML)</a>
-                    </td>
-                    <td class = "num-right-align">
-                        1/2
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        <a href="#">Homework 2 (CSS)</a>
-                    </td>
-                    <td class = "num-right-align">
-                        0/1
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        <a href="#">Homework 3 (Backend)</a>
-                    </td>
-                    <td class = "num-right-align">
-                        0/0
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        <a href="#">Homework 4 (Deploy)</a>
-                    </td>
-                    <td class = "num-right-align">
-                        0/0
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        <a href="#">Homework 5 (Permissions)</a>
-                    </td>
-                    <td class = "num-right-align">
-                        0/0
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        <a href="#">Homework 6 (JS)</a>
-                    </td>
-                    <td class = "num-right-align">
-                        0/0
-                    </td>
-                </tr>
+                {% for assignment_info in assignments_info %}
+                    <tr>
+                        <td>
+                            <a href=/{{ forloop.counter }}/submissions>{{ assignment_info.0 }}</a>
+                        </td>
+                        <td class = "num-right-align">
+                            {{ assignment_info.2 }}/{{ assignment_info.1 }}
+                        </td>
+                    </tr>
+                {% endfor %}
             </tbody>
         </table>
     </div>

@@ -3,49 +3,25 @@
 <meta charset="utf-8">
 <link rel="icon" href="../../static/favicon.ico">
 <link rel="stylesheet" href="/static/main.css">
-<title>Assignment 1 (HTML) - CS 3550</title>
-
-<nav>
-    <div class="nav-content">
-        <div class="left-side">
-            <h1>
-            CS 3550
-            </h1>
-            <a href="index.html">Assignments </a>
-        </div>
-        <div class="right-side">
-            <a class = "profile" href="profile.html">Profile</a>
-        </div>
-    </div>
-</nav>
+{% include "header.html" with title=assignment.title %}
 <main>
     <div class="page-content">
         <div class = "title">
-            <h1>Homework 1 (HTML)</h1>
-            <h2>Due September 08, total of 100 points</h2>
+            <h1>{{ assignment.title }}</h1>
+            <h2>Due {{ assignment.deadline|date:"F d" }}, total of 100 points</h2>
         </div>
         <div class="action-box">
             <p>
-                Currently 2/3 submissions
+                Currently, {{ num_submissions }}/{{ num_students }} submissions
             </p>
             <div class="submission-assigned">
-                1 submission assigned to you
-                <a href="submissions.html" title="Link to go grade assignments">Grade</a>
+                {{ num_grader_submissions }} submission assigned to you
+                <a href="/{{ assignment_id }}/submissions" title="Link to go grade assignments">Grade</a>
             </div>
         </div>
 
         <h3>Description</h3>
-        <p>
-            In this assignment, you will set up a web server serving HTML web pages for the grading application:
-        </p>
-        <ul>
-            <li>Configure and start a <em>basic web server</em> using Django</li>
-            <li>Create <em>basic web pages</em> using HTML for data/content</li>
-        </ul>
-        <p>
-            For example, here is a page <strong>you will make,</strong> in a file called <code>assignments.html</code>
-        </p>
-        <img src="/assignment.png" alt="Image of the assignment">
+        {{ assignment.description|safe }}
     </div>
 </main>
 

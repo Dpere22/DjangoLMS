@@ -3,22 +3,7 @@
 <meta charset="utf-8">
 <link rel="icon" href="../../static/favicon.ico">
 <link rel="stylesheet" href="/static/main.css">
-<title>All Assignments</title>
-
-<nav>
-    <div class="nav-content">
-        <div class="left-side">
-            <h1>
-            CS 3550
-            </h1>
-            <a href="index.html">Assignments </a>
-        </div>
-        <div class="right-side">
-            <a class = "profile" href="profile.html">Profile</a>
-        </div>
-    </div>
-</nav>
-
+{% include "header.html" with title="All Assignments" %}
 <main>
     <div class="page-content">
         <div class = "title">
@@ -36,7 +21,7 @@
                 {%  for assignment in assignments %}
                     <tr>
                         <td>
-                            <a href = "submissions.html">{{ assignment.title }}</a>
+                            <a href = {{ forloop.counter }}>{{ assignment.title }}</a>
                         </td>
                         <td class = "num-right-align">
                             {{ assignment.deadline|date:"M d" }}

@@ -3,26 +3,14 @@
 <meta charset="utf-8">
 <link rel="icon" href="../../static/favicon.ico">
 <link rel="stylesheet" href="/static/main.css">
-<title>Submissions</title>
 
-<nav>
-    <div class="nav-content">
-        <div class="left-side">
-            <h1>
-            CS 3550
-            </h1>
-            <a href="index.html">Assignments </a>
-        </div>
-        <div class="right-side">
-            <a class = "profile" href="profile.html">Profile</a>
-        </div>
-    </div>
-</nav>
+{% include "header.html" with title="Submissions" %}
+
 <main>
     <div class="page-content">
         <div class = "title">
-            <h1> Homework 1 (HTML) </h1>
-            <h2> All grades out of 100 </h2>
+            <h1> {{ assignment.title }} </h1>
+            <h2> All grades out of {{ assignment.points }} </h2>
         </div>
         <table>
             <thead>
@@ -39,39 +27,26 @@
                 </tr>
             </thead>
             <tbody>
-                <tr>
-                    <td>
-                        <label for="s1">s1</label>
-                    </td>
-                    <td>
-                        <a href="#">Submission</a>
-                    </td>
-                    <td>
-                        <form>
-                            <input type="number" id="s1">
-                        </form>
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        <label for="s2">s2</label>
-                    </td>
-                    <td>
-                        <a href="#">Submission</a>
-                    </td>
-                    <td>
-                        <form>
-                            <label>
-                                <input type="number" id="s2">
-                            </label>
-                        </form>
-                    </td>
-                </tr>
+                {% for submission in grader_submissions %}
+                    <tr>
+                        <td>
+                            <label for={{ submission.author.get_full_name }}>{{ submission.author.get_full_name }}</label>
+                        </td>
+                        <td>
+                            <a href = {{ submission.file }}>Submission</a>
+                        </td>
+                        <td>
+                            <form>
+                                <input type="number" value="{{ submission.score }}" id={{ submission.author.get_full_name }}>
+                            </form>
+                        </td>
+                    </tr>
+                {% endfor %}
             </tbody>
         </table>
         <form>
             <button type = "submit" class="SubmitButton">Submit</button>
-            <a href="assignment.html">Back to assignment</a>
+            <a href="/{{ assignment_id }}/">Back to assignment</a>
         </form>
     </div>
 </main>
