@@ -1,7 +1,7 @@
 from django.http import Http404
 
 from . import models
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 
 def index(request):
     assignments = models.Assignment.objects.all()
@@ -24,6 +24,8 @@ def assignment(request, assignment_id):
 
 
 def submissions(request, assignment_id):
+    if request.method == "POST":
+        return redirect(f"/{assignment_id}/submissions")
     curr_assignment = models.Assignment.objects.get(pk=assignment_id)
     grader_submissions = models.User.objects.get(username="g").graded_set.filter(assignment_id=assignment_id)
     ordered = grader_submissions.order_by("author")
