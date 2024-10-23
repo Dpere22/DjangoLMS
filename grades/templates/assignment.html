@@ -8,14 +8,14 @@
     <div class="page-content">
         <div class = "title">
             <h1>{{ assignment.title }}</h1>
-            <h2>Due {{ assignment.deadline|date:"F d" }}, total of 100 points</h2>
+            <h2>Due {{ assignment.deadline|date:"F d" }}, total of {{ assignment.points }} point{{ assignment.points|pluralize}}</h2>
         </div>
         <div class="action-box">
             <p>
-                Currently, {{ num_submissions }}/{{ num_students }} submissions
+                Currently, {{ num_submissions }}/{{ num_students }} submission{{ num_students|pluralize}}
             </p>
             <div class="submission-assigned">
-                {{ num_grader_submissions }} submission assigned to you
+                {{ num_grader_submissions }} submission{{ num_grader_submissions|pluralize }} assigned to you
                 <a href="/{{ assignment_id }}/submissions" title="Link to go grade assignments">Grade</a>
             </div>
         </div>

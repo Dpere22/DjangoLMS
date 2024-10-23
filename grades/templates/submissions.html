@@ -35,7 +35,7 @@
                             <label for={{ submission.author.get_full_name }}>{{ submission.author.get_full_name }}</label>
                         </td>
                         <td>
-                            <a href = {{ submission.file }}>Submission</a>
+                            <a href = {{ submission.file.url }}>Submission</a>
                         </td>
                         <td>
                             <input type="number" value="{{ submission.score }}" id={{ submission.author.get_full_name }}>
