@@ -29,16 +29,31 @@
                 </tr>
             </thead>
             <tbody>
-                {% for submission in grader_submissions %}
+                <output>
+                    {% for err in other_errors %}
+                        <p>
+                            {{ err }}
+                        </p>
+                    {% endfor %}
+                </output>
+                {% for submission, errors in organized %}
                     <tr>
                         <td>
-                            <label for={{ submission.author.get_full_name }}>{{ submission.author.get_full_name }}</label>
+                            <label for="{{ submission.author.get_full_name }}">{{ submission.author.get_full_name }}</label>
                         </td>
                         <td>
                             <a href = {{ submission.file.url }}>Submission</a>
                         </td>
                         <td>
-                            <input type="number" value="{{ submission.score }}" id={{ submission.author.get_full_name }}>
+                            <input type="number" value="{{ submission.score }}" id="{{ submission.author.get_full_name }}"
+                                   name="grade-{{ submission.id }}" min="0" max="{{ submission.assignment.points }}">
+                        </td>
+                        <td>
+                            <output>
+                                {% for err in errors %}
+                                    {{ err }}
+                                {% endfor %}
+                            </output>
                         </td>
                     </tr>
                 {% endfor %}
