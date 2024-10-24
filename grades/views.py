@@ -55,9 +55,10 @@ def submissions(request, assignment_id):
     grader_submissions = models.User.objects.get(username="g").graded_set.filter(assignment_id=assignment_id)
     errors = {}
     other_errors = []
+    has_errors = False
     if request.method == "POST":
-        errors, other_errors = try_grade(request.POST, curr_assignment.points)
-        if not errors:
+        errors, other_errors, has_errors = try_grade(request.POST, curr_assignment.points)
+        if not has_errors:
             return redirect(f"/{assignment_id}/submissions")
     organized = create_zip(grader_submissions, errors)
     return render(request, 'submissions.html', {"assignment": curr_assignment, "organized": organized,
@@ -78,6 +79,7 @@ def try_grade(post, max_points):
     submission_objects = []
     other_errors = []
     error_fields = {}
+    has_errors = False
     for key in post:
         if "grade-" not in key:
             continue
@@ -91,6 +93,7 @@ def try_grade(post, max_points):
                 if 0.0 <= num_score <= float(max_points):
                     submission.score = num_score
                 else:
+                    has_errors = True
                     error_fields[sub_id].append("Score out of range")
             else:
                 submission.score = None
@@ -98,12 +101,15 @@ def try_grade(post, max_points):
             submission_objects.append(submission)
         except models.Submission.DoesNotExist:
             error_fields[sub_id].append("Submission does not exist")
+            has_errors = True
         except (ValueError, KeyError):
             error_fields[sub_id].append("Please enter an valid number")
+            has_errors = True
         except ValidationError:
             other_errors.append("Validation Error")
+            has_errors = True
     models.Submission.objects.bulk_update(submission_objects, ['score'])
-    return error_fields, other_errors
+    return error_fields, other_errors, has_errors
 
 def profile(request):
     assignments = models.Assignment.objects.all()
