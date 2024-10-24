@@ -1,6 +1,6 @@
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
-from django.http import Http404
+from django.http import Http404, HttpResponse
 from django.shortcuts import render, redirect, get_object_or_404
 
 from . import models
@@ -118,3 +118,7 @@ def profile(request):
 
 def login_form(request):
     return render(request, 'login.html')
+
+def show_upload(request, filename):
+    submission = models.Submission.objects.get(file=filename)
+    return HttpResponse(submission.file.open())

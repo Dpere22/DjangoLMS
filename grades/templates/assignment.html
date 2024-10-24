@@ -13,7 +13,7 @@
         <div class="action-box">
             <p>
                 {% if submission is not None %}
-                    Current submission: {{ submission.file.name }}
+                    Current submission: <a href = {{ submission.file.url }}>{{ submission.file.name }}</a>
                 {% else %}
                     No current submission
                 {% endif %}
