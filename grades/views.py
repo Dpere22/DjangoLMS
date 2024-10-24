@@ -5,9 +5,11 @@ from django.shortcuts import render, redirect, get_object_or_404
 
 from . import models
 
+
 def index(request):
     assignments = models.Assignment.objects.all()
     return render(request, 'index.html', {"assignments": assignments})
+
 
 def assignment(request, assignment_id):
     try:
@@ -18,9 +20,8 @@ def assignment(request, assignment_id):
         except models.Submission.DoesNotExist:
             submission = None
         if request.method == "POST":
-            errors, other_errors = try_grade(request.POST, curr_assignment.points)
-            if not errors:
-                return redirect(f"/{assignment_id}/submissions")
+            submit_assignment(request, curr_assignment, submission, alice)
+            return redirect(f'/{assignment_id}/')
         num_students = models.Group.objects.get(name="Students").user_set.count()
         num_submissions = curr_assignment.submission_set.count()
         num_grader_submissions = models.User.objects.get(username="g").graded_set.filter(
@@ -36,6 +37,19 @@ def assignment(request, assignment_id):
         raise Http404("Assignment does not exist")
 
 
+def submit_assignment(request, curr_assignment, submission, author):
+    grader = get_object_or_404(User, username="g")
+    file = request.FILES['file']
+    if submission is None:
+        new_sub = models.Submission.objects.create(assignment=curr_assignment, author=author, grader=grader, score = None, file = file)
+        new_sub.full_clean()
+        new_sub.save()
+    else:
+        submission.file = file
+        submission.full_clean()
+        submission.save()
+
+
 def submissions(request, assignment_id):
     curr_assignment = models.Assignment.objects.get(pk=assignment_id)
     grader_submissions = models.User.objects.get(username="g").graded_set.filter(assignment_id=assignment_id)
@@ -48,6 +62,7 @@ def submissions(request, assignment_id):
     organized = create_zip(grader_submissions, errors)
     return render(request, 'submissions.html', {"assignment": curr_assignment, "organized": organized,
                                                 "assignment_id": assignment_id, "other_errors": other_errors})
+
 
 def create_zip(subs, errors):
     error_list = []
@@ -90,8 +105,6 @@ def try_grade(post, max_points):
     models.Submission.objects.bulk_update(submission_objects, ['score'])
     return error_fields, other_errors
 
-
-##what if we tried to create a list that had lists at the correct position
 def profile(request):
     assignments = models.Assignment.objects.all()
     assignments_info = []
@@ -105,4 +118,3 @@ def profile(request):
 
 def login_form(request):
     return render(request, 'login.html')
-

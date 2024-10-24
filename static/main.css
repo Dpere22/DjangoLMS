@@ -121,7 +121,7 @@ h3{
 }
 .action-box{
     flex-direction: column;
-    .submission-assigned{
+    .submission-assigned, form{
         display:flex;
         justify-content:space-between;
     }
