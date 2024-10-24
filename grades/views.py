@@ -1,18 +1,26 @@
-from django.contrib.admin.templatetags.admin_modify import register
+from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.http import Http404
+from django.shortcuts import render, redirect, get_object_or_404
 
 from . import models
-from django.shortcuts import render, redirect
 
 def index(request):
     assignments = models.Assignment.objects.all()
     return render(request, 'index.html', {"assignments": assignments})
 
-
 def assignment(request, assignment_id):
     try:
+        alice = get_object_or_404(User, username="a")
         curr_assignment = models.Assignment.objects.get(pk=assignment_id)
+        try:
+            submission = models.Submission.objects.get(assignment=curr_assignment, author=alice)
+        except models.Submission.DoesNotExist:
+            submission = None
+        if request.method == "POST":
+            errors, other_errors = try_grade(request.POST, curr_assignment.points)
+            if not errors:
+                return redirect(f"/{assignment_id}/submissions")
         num_students = models.Group.objects.get(name="Students").user_set.count()
         num_submissions = curr_assignment.submission_set.count()
         num_grader_submissions = models.User.objects.get(username="g").graded_set.filter(
@@ -22,7 +30,8 @@ def assignment(request, assignment_id):
                        "num_students": num_students,
                        "num_submissions": num_submissions,
                        "num_grader_submissions": num_grader_submissions,
-                       "assignment_id": assignment_id})
+                       "assignment_id": assignment_id,
+                       "submission": submission})
     except models.Assignment.DoesNotExist:
         raise Http404("Assignment does not exist")
 

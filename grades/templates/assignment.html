@@ -12,6 +12,15 @@
         </div>
         <div class="action-box">
             <p>
+                {% if submission is not None %}
+                {{ submission.score }}
+                {% else %}
+                    No current submission
+                {% endif %}
+            </p>
+        </div>
+        <div class="action-box">
+            <p>
                 Currently, {{ num_submissions }}/{{ num_students }} submission{{ num_students|pluralize}}
             </p>
             <div class="submission-assigned">
