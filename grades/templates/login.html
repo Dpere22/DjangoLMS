@@ -9,10 +9,11 @@
         <div class="title">
             <h1> Log in </h1>
         </div>
-        <form class="login">
+        <form class="login" action="/profile/login" method="post">
+            {% csrf_token %}
             <div class="input-line">
             <label for="username">Username:</label>
-            <input id="username" name="username" autofocus="autofocus">
+            <input type="text" id="username" name="username" autofocus="autofocus">
             </div>
             <div class="input-line">
             <label for="password">Password:</label>

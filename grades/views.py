@@ -2,7 +2,7 @@ from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.http import Http404, HttpResponse
 from django.shortcuts import render, redirect, get_object_or_404
-
+from django.contrib.auth import authenticate, login, logout
 from . import models
 
 
@@ -119,12 +119,26 @@ def profile(request):
         num_to_grade = grade_set.count()
         graded = grade_set.filter(score__isnull=False).count()
         assignments_info.append([inner_assignment.title, num_to_grade, graded])
-    return render(request, 'profile.html', {'assignments_info': assignments_info})
+    return render(request, 'profile.html', {'assignments_info': assignments_info,
+                                            'user': request.user})
 
 
 def login_form(request):
+    if request.method == "POST":
+        username = request.POST.get("username", "")
+        password = request.POST.get("password", "")
+        user = authenticate(request, username=username, password=password)
+        if user is not None:
+            login(request, user)
+            return redirect("/profile/")
+        else:
+            return render(request, 'login.html')
     return render(request, 'login.html')
 
 def show_upload(request, filename):
     submission = models.Submission.objects.get(file=filename)
     return HttpResponse(submission.file.open())
+
+def logout_form(request):
+    logout(request)
+    return redirect("/profile/login")

@@ -10,8 +10,8 @@
             <h1> Your grades </h1>
         </div>
         <div class="login-action-box">
-            Currently logged in as ta1.
-            <a href="/profile/login" role="button">Log out</a>
+            Currently logged in as {{ user.get_full_name }}.
+            <a href="/profile/logout/" role="button">Log out</a>
         </div>
 
         <table>
