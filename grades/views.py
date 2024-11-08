@@ -70,10 +70,13 @@ def submit_assignment(request, curr_assignment, submission, author):
 
 def submissions(request, assignment_id):
     curr_assignment = models.Assignment.objects.get(pk=assignment_id)
-    grader_submissions = models.User.objects.get(username="g").graded_set.filter(assignment_id=assignment_id)
+    curr_user = request.user
+    if not curr_user.is_superuser:
+        grader_submissions = curr_user.graded_set.filter(assignment_id=assignment_id)
+    else:
+        grader_submissions = models.Submission.objects.filter(assignment_id=assignment_id)
     errors = {}
     other_errors = []
-    has_errors = False
     if request.method == "POST":
         errors, other_errors, has_errors = try_grade(request.POST, curr_assignment.points)
         if not has_errors:
