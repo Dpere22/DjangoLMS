@@ -19,23 +19,54 @@ def assignment(request, assignment_id):
             submission = models.Submission.objects.get(assignment=curr_assignment, author=alice)
         except models.Submission.DoesNotExist:
             submission = None
-        if request.method == "POST":
-            submit_assignment(request, curr_assignment, submission, alice)
-            return redirect(f'/{assignment_id}/')
-        num_students = models.Group.objects.get(name="Students").user_set.count()
-        num_submissions = curr_assignment.submission_set.count()
-        num_grader_submissions = models.User.objects.get(username="g").graded_set.filter(
-            assignment_id=assignment_id).count()
-        return render(request, 'assignment.html',
-                      {"assignment": curr_assignment,
-                       "num_students": num_students,
-                       "num_submissions": num_submissions,
-                       "num_grader_submissions": num_grader_submissions,
-                       "assignment_id": assignment_id,
-                       "submission": submission})
+        if is_student(request.user):
+            if request.method == "POST":
+                submit_assignment(request, curr_assignment, submission, alice)
+                return redirect(f'/{assignment_id}/')
+            return render(request, 'assignment.html',
+                          {"assignment": curr_assignment,
+                           "num_students": 0,
+                           "num_submissions": 0,
+                           "num_grader_submissions": 0,
+                           "assignment_id": assignment_id,
+                           "submission": submission,
+                           "is_student": True,
+                           "is_ta": False})
+        elif is_ta(request.user):
+            num_students = models.Group.objects.get(name="Students").user_set.count()
+            num_submissions = curr_assignment.submission_set.count()
+            num_grader_submissions = models.User.objects.get(username="g").graded_set.filter(
+                assignment_id=assignment_id).count()
+            return render(request, 'assignment.html',
+                          {"assignment": curr_assignment,
+                           "num_students": num_students,
+                           "num_submissions": num_submissions,
+                           "num_grader_submissions": num_grader_submissions,
+                           "assignment_id": assignment_id,
+                           "submission": submission,
+                           "is_student": False,
+                           "is_ta": True})
     except models.Assignment.DoesNotExist:
         raise Http404("Assignment does not exist")
 
+def render_assignment_ta(curr_assignment, request, assignment_id):
+    num_students = models.Group.objects.get(name="Students").user_set.count()
+    num_submissions = curr_assignment.submission_set.count()
+    num_grader_submissions = request.user.graded_set.filter(
+        assignment_id=assignment_id).count()
+    return render(request, 'assignment.html',
+                  {"assignment": curr_assignment,
+                   "num_students": num_students,
+                   "num_submissions": num_submissions,
+                   "num_grader_submissions": num_grader_submissions,
+                   "assignment_id": assignment_id,
+                   "is_student": False,
+                   "is_ta": True})
+
+def is_student(user):
+    return user.groups.filter(name="Students").exists() or user.is_anonymous
+def is_ta(user):
+    return user.groups.filter(name="Teaching Assistants").exists() or user.is_superuser
 
 def submit_assignment(request, curr_assignment, submission, author):
     grader = get_object_or_404(User, username="g")

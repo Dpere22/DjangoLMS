@@ -10,6 +10,7 @@
             <h1>{{ assignment.title }}</h1>
             <h2>Due {{ assignment.deadline|date:"F d" }}, total of {{ assignment.points }} point{{ assignment.points|pluralize}}</h2>
         </div>
+    {% if is_student %}
         <div class="action-box">
             <p>
                 {% if submission is not None %}
@@ -27,6 +28,7 @@
                 <button>submit</button>
             </form>
         </div>
+    {% elif is_ta %}
         <div class="action-box">
             <p>
                 Currently, {{ num_submissions }}/{{ num_students }} submission{{ num_students|pluralize}}
@@ -36,7 +38,7 @@
                 <a href="/{{ assignment_id }}/submissions" title="Link to go grade assignments">Grade</a>
             </div>
         </div>
-
+    {% endif %}
         <h3>Description</h3>
         {{ assignment.description|safe }}
     </div>
