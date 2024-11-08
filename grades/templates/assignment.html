@@ -33,10 +33,12 @@
             <p>
                 Currently, {{ num_submissions }}/{{ num_students }} submission{{ num_students|pluralize}}
             </p>
-            <div class="submission-assigned">
-                {{ num_grader_submissions }} submission{{ num_grader_submissions|pluralize }} assigned to you
-                <a href="/{{ assignment_id }}/submissions" title="Link to go grade assignments">Grade</a>
-            </div>
+            {% if not is_superuser %}
+                <div class="submission-assigned">
+                    {{ num_grader_submissions }} submission{{ num_grader_submissions|pluralize }} assigned to you
+                    <a href="/{{ assignment_id }}/submissions" title="Link to go grade assignments">Grade</a>
+                </div>
+            {% endif %}
         </div>
     {% endif %}
         <h3>Description</h3>

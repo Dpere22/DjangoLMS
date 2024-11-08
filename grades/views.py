@@ -30,8 +30,12 @@ def assignment(request, assignment_id):
         elif is_ta(curr_user):
             num_students = models.Group.objects.get(name="Students").user_set.count()
             num_submissions = curr_assignment.submission_set.count()
-            num_grader_submissions = curr_user.graded_set.filter(
-                assignment_id=assignment_id).count()
+            is_superuser = curr_user.is_superuser
+            if is_superuser:
+                num_grader_submissions = models.Submission.objects.filter(assignment_id=assignment_id).count()
+            else:
+                num_grader_submissions = curr_user.graded_set.filter(
+                    assignment_id=assignment_id).count()
             return render(request, 'assignment.html',
                           {"assignment": curr_assignment,
                            "num_students": num_students,
@@ -39,7 +43,8 @@ def assignment(request, assignment_id):
                            "num_grader_submissions": num_grader_submissions,
                            "assignment_id": assignment_id,
                            "is_student": False,
-                           "is_ta": True})
+                           "is_ta": True,
+                           "is_superuser": is_superuser,})
     except models.Assignment.DoesNotExist:
         raise Http404("Assignment does not exist")
 
