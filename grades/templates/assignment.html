@@ -14,9 +14,21 @@
         <div class="action-box">
             <p>
                 {% if submission is not None %}
-                    Current submission: <a href = {{ submission.file.url }}>{{ submission.file.name }}</a>
+                    {% if graded %}
+                        Your submission, <a href = {{ submission.file.url }}>{{ submission.file.name }}</a>, received {{ score }}/{{ assignment.points }} point{{ assignment.points|pluralize }} ({{ percent }}%)
+                    {% else %}
+                        {% if past_due %}
+                            Your submission, <a href = {{ submission.file.url }}>{{ submission.file.name }}</a>, is being graded
+                        {% else %}
+                            Your current submission is <a href = {{ submission.file.url }}>{{ submission.file.name }}</a>
+                        {% endif %}
+                    {% endif %}
                 {% else %}
-                    No current submission
+                    {% if not past_due %}
+                        No current submission
+                    {% else %}
+                        You did not submit this assignment and received 0 points
+                    {% endif %}
                 {% endif %}
             </p>
             <form enctype="multipart/form-data" action="/{{ assignment_id }}/" method="post">

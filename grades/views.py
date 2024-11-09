@@ -19,6 +19,7 @@ def assignment(request, assignment_id):
         curr_assignment = models.Assignment.objects.get(pk=assignment_id)
         if is_student(curr_user):
             submission = get_submission(curr_assignment, curr_user)
+            has_submission, past_due, graded, score, percent = get_submission_stuff(curr_assignment, submission)
             if request.method == "POST":
                 submit_assignment(request, curr_assignment, submission, request.user)
                 return redirect(f'/{assignment_id}/')
@@ -28,7 +29,12 @@ def assignment(request, assignment_id):
                            "assignment_id": assignment_id,
                            "submission": submission,
                            "is_student": True,
-                           "is_ta": False})
+                           "is_ta": False,
+                           "past_due": past_due,
+                           "has_submission": has_submission,
+                           "graded": graded,
+                           "score": score,
+                           "percent": percent})
         elif is_ta(curr_user):
             num_students = models.Group.objects.get(name="Students").user_set.count()
             num_submissions = curr_assignment.submission_set.count()
@@ -49,6 +55,22 @@ def assignment(request, assignment_id):
                            "is_superuser": is_superuser,})
     except models.Assignment.DoesNotExist:
         raise Http404("Assignment does not exist")
+
+
+def get_submission_stuff(curr_assignment, submission):
+    current_time = timezone.now()
+    past_due, has_submission, graded = False, False, False
+    score, percent = 0, 0
+    if current_time > curr_assignment.deadline:  ##i.e. it's late
+        past_due = True
+    if submission is not None:
+        has_submission = True
+        if submission.score is not None:
+            graded = True
+            score = submission.score
+            percent = submission.score / curr_assignment.points * 100
+    return has_submission, past_due, graded, score, percent
+
 
 def get_submission(curr_assignment, curr_user):
     try:
