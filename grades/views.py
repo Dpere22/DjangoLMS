@@ -1,9 +1,8 @@
 from django.contrib.auth import authenticate, login, logout
-from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.db.models import Count, Q
 from django.http import Http404, HttpResponse, HttpResponseBadRequest
-from django.shortcuts import render, redirect, get_object_or_404
+from django.shortcuts import render, redirect
 from django.utils import timezone
 
 from . import models
