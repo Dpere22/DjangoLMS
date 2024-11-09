@@ -1,4 +1,4 @@
-from django.core.exceptions import ValidationError
+from django.core.exceptions import ValidationError, PermissionDenied
 from django.db import models
 from django.contrib.auth.models import User, Group
 
@@ -21,3 +21,8 @@ class Submission(models.Model):
     grader = models.ForeignKey(User, on_delete=models.SET_NULL, related_name='graded_set', null=True)
     score = models.FloatField(validators=[is_positive], null = True, blank = True)
     file = models.FileField()
+    def change_grade(self, user, grade):
+        if user == self.grader:
+            self.score = grade
+        else:
+            raise PermissionDenied

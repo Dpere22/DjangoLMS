@@ -1,10 +1,11 @@
 from django.contrib.auth import authenticate, login, logout
-from django.core.exceptions import ValidationError
+from django.core.exceptions import ValidationError, PermissionDenied
 from django.db.models import Count, Q
 from django.http import Http404, HttpResponse, HttpResponseBadRequest
 from django.shortcuts import render, redirect
 from django.utils import timezone
 from django.contrib.auth.decorators import login_required
+from django.utils.http import url_has_allowed_host_and_scheme
 
 from . import models
 
@@ -106,6 +107,8 @@ def submit_assignment(request, curr_assignment, submission, author):
 
 @login_required
 def submissions(request, assignment_id):
+    if not is_ta(request.user):
+        raise PermissionDenied
     curr_assignment = models.Assignment.objects.get(pk=assignment_id)
     curr_user = request.user
     if not curr_user.is_superuser:
@@ -115,7 +118,7 @@ def submissions(request, assignment_id):
     errors = {}
     other_errors = []
     if request.method == "POST":
-        errors, other_errors, has_errors = try_grade(request.POST, curr_assignment.points)
+        errors, other_errors, has_errors = try_grade(request.user, request.POST, curr_assignment.points)
         if not has_errors:
             return redirect(f"/{assignment_id}/submissions")
     organized = create_zip(grader_submissions, errors)
@@ -133,7 +136,7 @@ def create_zip(subs, errors):
     return zip(subs, error_list)
 
 
-def try_grade(post, max_points):
+def try_grade(user, post, max_points):
     submission_objects = []
     other_errors = []
     error_fields = {}
@@ -149,12 +152,12 @@ def try_grade(post, max_points):
             if score != "":
                 num_score = float(score)
                 if 0.0 <= num_score <= float(max_points):
-                    submission.score = num_score
+                    submission.change_grade(user, num_score)
                 else:
                     has_errors = True
                     error_fields[sub_id].append("Score out of range")
             else:
-                submission.score = None
+                submission.change_grade(user, None)
             submission.full_clean()
             submission_objects.append(submission)
         except models.Submission.DoesNotExist:
@@ -213,25 +216,32 @@ def get_student_score(grade_set, assign):
         else:
             return str(score)
 
+
 def login_form(request):
     next_page = request.GET.get('next')
     if next_page is None:
         next_page = '/profile/'
     if request.method == "POST":
+        next_url = request.POST.get('next', '/profile/')
+        if not url_has_allowed_host_and_scheme(next_url, None):
+            next_url = '/'
         username = request.POST.get("username", "")
         password = request.POST.get("password", "")
         user = authenticate(request, username=username, password=password)
         if user is not None:
             login(request, user)
-            return redirect(request.POST.get('next_page', '/profile/'))
+            return redirect(next_url)
         else:
-            return render(request, 'login.html', {"next_page": next_page})
+            error = 'Username and password do not match'
+            return render(request, 'login.html', {"next_page": next_page, "error": error})
     return render(request, 'login.html',{"next_page": next_page})
+
 
 @login_required
 def show_upload(request, filename):
     submission = models.Submission.objects.get(file=filename)
     return HttpResponse(submission.file.open())
+
 
 def logout_form(request):
     logout(request)
