@@ -11,6 +11,7 @@
         </div>
         <form class="login" action="/profile/login/" method="post">
             {% csrf_token %}
+            <input type="hidden" name="next_page" value={{ next_page }}>
             <div class="input-line">
             <label for="username">Username:</label>
             <input type="text" id="username" name="username" autofocus="autofocus">

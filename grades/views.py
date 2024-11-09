@@ -4,15 +4,16 @@ from django.db.models import Count, Q
 from django.http import Http404, HttpResponse, HttpResponseBadRequest
 from django.shortcuts import render, redirect
 from django.utils import timezone
+from django.contrib.auth.decorators import login_required
 
 from . import models
 
-
+@login_required
 def index(request):
     assignments = models.Assignment.objects.all()
     return render(request, 'index.html', {"assignments": assignments})
 
-
+@login_required
 def assignment(request, assignment_id):
     try:
         curr_user = request.user
@@ -103,7 +104,7 @@ def submit_assignment(request, curr_assignment, submission, author):
         submission.full_clean()
         submission.save()
 
-
+@login_required
 def submissions(request, assignment_id):
     curr_assignment = models.Assignment.objects.get(pk=assignment_id)
     curr_user = request.user
@@ -168,6 +169,7 @@ def try_grade(post, max_points):
     models.Submission.objects.bulk_update(submission_objects, ['score'])
     return error_fields, other_errors, has_errors
 
+@login_required
 def profile(request):
     assignments = models.Assignment.objects.all()
     assignments_info = []
@@ -203,7 +205,7 @@ def get_student_score(grade_set, assign):
         if current_time > assign.deadline:
             return "Missing"
         else:
-            return "Mot Due"
+            return "Not Due"
     else:
         score = grade_set[0].score
         if score is None:
@@ -212,17 +214,21 @@ def get_student_score(grade_set, assign):
             return str(score)
 
 def login_form(request):
+    next_page = request.GET.get('next')
+    if next_page is None:
+        next_page = '/profile/'
     if request.method == "POST":
         username = request.POST.get("username", "")
         password = request.POST.get("password", "")
         user = authenticate(request, username=username, password=password)
         if user is not None:
             login(request, user)
-            return redirect("/profile/")
+            return redirect(request.POST.get('next_page', '/profile/'))
         else:
-            return render(request, 'login.html')
-    return render(request, 'login.html')
+            return render(request, 'login.html', {"next_page": next_page})
+    return render(request, 'login.html',{"next_page": next_page})
 
+@login_required
 def show_upload(request, filename):
     submission = models.Submission.objects.get(file=filename)
     return HttpResponse(submission.file.open())
