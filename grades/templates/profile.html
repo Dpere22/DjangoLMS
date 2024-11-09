@@ -18,9 +18,29 @@
             <thead>
                 <tr>
                     <th>Assignment</th>
-                    <th class = "num-right-align">Graded</th>
+                    <th class = "num-right-align">
+                        {% if is_student %}
+                            Grades
+                        {% else %}
+                            Graded
+                        {% endif %}
+                    </th>
                 </tr>
             </thead>
+        {% if is_student %}
+            <tbody>
+                {% for assignment_info in assignments_info %}
+                    <tr>
+                        <td>
+                            <a href=/{{ forloop.counter }}/submissions>{{ assignment_info.0 }}</a>
+                        </td>
+                        <td class = "num-right-align">
+                            {{ assignment_info.2 }}
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        {% elif not is_student %}
             <tbody>
                 {% for assignment_info in assignments_info %}
                     <tr>
@@ -33,6 +53,7 @@
                     </tr>
                 {% endfor %}
             </tbody>
+        {% endif %}
         </table>
     </div>
 </main>

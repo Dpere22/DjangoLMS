@@ -17,7 +17,7 @@ class Assignment(models.Model):
 
 class Submission(models.Model):
     assignment = models.ForeignKey(Assignment, on_delete=models.CASCADE)
-    author = models.ForeignKey(User, on_delete=models.CASCADE)
+    author = models.ForeignKey(User, on_delete=models.CASCADE, related_name='author_set')
     grader = models.ForeignKey(User, on_delete=models.SET_NULL, related_name='graded_set', null=True)
     score = models.FloatField(validators=[is_positive], null = True, blank = True)
     file = models.FileField()

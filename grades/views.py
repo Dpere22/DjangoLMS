@@ -1,8 +1,10 @@
+from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.http import Http404, HttpResponse
 from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth import authenticate, login, logout
+from django.utils import timezone
+
 from . import models
 
 
@@ -140,14 +142,45 @@ def try_grade(post, max_points):
 def profile(request):
     assignments = models.Assignment.objects.all()
     assignments_info = []
-    for inner_assignment in assignments:
-        grade_set = models.User.objects.get(username="g").graded_set.filter(assignment=inner_assignment)
-        num_to_grade = grade_set.count()
-        graded = grade_set.filter(score__isnull=False).count()
-        assignments_info.append([inner_assignment.title, num_to_grade, graded])
-    return render(request, 'profile.html', {'assignments_info': assignments_info,
-                                            'user': request.user})
+    user = request.user
+    is_s = is_student(user)
+    is_t = is_ta(user)
+    if is_t:
+        for inner_assignment in assignments:
+            grade_set = user.graded_set.filter(assignment=inner_assignment)
+            num_to_grade = grade_set.count()
+            graded = grade_set.filter(score__isnull=False).count()
+            assignments_info.append([inner_assignment.title, num_to_grade, graded])
+        return render(request, 'profile.html', {'assignments_info': assignments_info,
+                                                'user': request.user, 'is_student': is_s})
+    elif is_s:
+        if user.is_anonymous:
+            for inner_assignment in assignments:
+                grade_set = models.User.objects.get(username="g").graded_set.filter(assignment=inner_assignment)
+                num_to_grade = grade_set.count()
+                graded = grade_set.filter(score__isnull=False).count()
+                assignments_info.append([inner_assignment.title, num_to_grade, graded])
+            return render(request, 'profile.html', {'assignments_info': assignments_info,
+                                                    'user': request.user, 'is_student': is_s})
+        for inner_assignment in assignments:
+            grade_set = user.author_set.filter(assignment=inner_assignment)
+            assignments_info.append([inner_assignment.title, grade_set, get_student_score(grade_set, inner_assignment)])
+        return render(request, 'profile.html', {'assignments_info': assignments_info,
+                                                'user': request.user, 'is_student': is_s})
 
+def get_student_score(grade_set, assign):
+    current_time = timezone.now()
+    if grade_set.count() == 0:
+        if current_time > assign.deadline:
+            return "Missing"
+        else:
+            return "Mot Due"
+    else:
+        score = grade_set[0].score
+        if score is None:
+            return "Ungraded"
+        else:
+            return str(score)
 
 def login_form(request):
     if request.method == "POST":
