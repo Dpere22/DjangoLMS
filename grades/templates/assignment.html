@@ -31,6 +31,7 @@
                     {% endif %}
                 {% endif %}
             </p>
+        {% if not past_due %}
             <form enctype="multipart/form-data" action="/{{ assignment_id }}/" method="post">
                 {% csrf_token %}
                 <div>
@@ -39,6 +40,7 @@
                 </div>
                 <button>submit</button>
             </form>
+        {% endif %}
         </div>
     {% elif is_ta %}
         <div class="action-box">

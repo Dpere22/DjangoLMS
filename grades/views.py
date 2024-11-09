@@ -1,7 +1,8 @@
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
-from django.http import Http404, HttpResponse
+from django.db.models import Count, Q
+from django.http import Http404, HttpResponse, HttpResponseBadRequest
 from django.shortcuts import render, redirect, get_object_or_404
 from django.utils import timezone
 
@@ -21,8 +22,11 @@ def assignment(request, assignment_id):
             submission = get_submission(curr_assignment, curr_user)
             has_submission, past_due, graded, score, percent = get_submission_stuff(curr_assignment, submission)
             if request.method == "POST":
-                submit_assignment(request, curr_assignment, submission, request.user)
-                return redirect(f'/{assignment_id}/')
+                if not past_due:
+                    submit_assignment(request, curr_assignment, submission, request.user)
+                    return redirect(f'/{assignment_id}/')
+                else:
+                    return HttpResponseBadRequest
             else:
                 return render(request, 'assignment.html',
                           {"assignment": curr_assignment,
@@ -56,6 +60,10 @@ def assignment(request, assignment_id):
     except models.Assignment.DoesNotExist:
         raise Http404("Assignment does not exist")
 
+def pick_grader(assign):
+    grader = models.Group.objects.get(name="Teaching Assistants").user_set.annotate(total_assigned = Count("graded_set", filter=Q(graded_set__assignment = assign))).order_by("total_assigned").first()
+    return grader
+
 
 def get_submission_stuff(curr_assignment, submission):
     current_time = timezone.now()
@@ -85,9 +93,9 @@ def is_ta(user):
     return user.groups.filter(name="Teaching Assistants").exists() or user.is_superuser
 
 def submit_assignment(request, curr_assignment, submission, author):
-    grader = get_object_or_404(User, username="g")
     file = request.FILES['file']
     if submission is None:
+        grader = pick_grader(curr_assignment)
         new_sub = models.Submission.objects.create(assignment=curr_assignment, author=author, grader=grader, score = None, file = file)
         new_sub.full_clean()
         new_sub.save()
