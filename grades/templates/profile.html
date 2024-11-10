@@ -32,14 +32,24 @@
                 {% for assignment_info in assignments_info %}
                     <tr>
                         <td>
-                            <a href=/{{ forloop.counter }}/submissions>{{ assignment_info.0 }}</a>
+                            <a href="/{{ forloop.counter }}/"> {{ assignment_info.0 }} </a>
                         </td>
                         <td class = "num-right-align">
-                            {{ assignment_info.2 }}
+                            {{ assignment_info.1 }}
                         </td>
                     </tr>
                 {% endfor %}
             </tbody>
+            <tfoot>
+                <tr>
+                    <td>
+                        Final Grade
+                    </td>
+                    <td class="num-right-align">
+                        {{ final_percent }}%
+                    </td>
+                </tr>
+            </tfoot>
         {% elif not is_student %}
             <tbody>
                 {% for assignment_info in assignments_info %}

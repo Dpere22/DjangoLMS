@@ -36,11 +36,12 @@
                 {% csrf_token %}
                 <div>
                     <label for="file">Submit Assignment: </label>
-                    <input name="file" type="file">
+                    <input name="file" type="file" accept="application/pdf">
                 </div>
                 <button>submit</button>
             </form>
         {% endif %}
+        <output>{{ error }}</output>
         </div>
     {% elif is_ta %}
         <div class="action-box">

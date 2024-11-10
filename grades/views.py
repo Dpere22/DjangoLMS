@@ -24,8 +24,22 @@ def assignment(request, assignment_id):
             has_submission, past_due, graded, score, percent = get_submission_stuff(curr_assignment, submission)
             if request.method == "POST":
                 if not past_due:
-                    submit_assignment(request, curr_assignment, submission, request.user)
-                    return redirect(f'/{assignment_id}/')
+                    error = submit_assignment(request, curr_assignment, submission, request.user)
+                    if error is None:
+                        return redirect(f'/{assignment_id}/')
+                    else:
+                        return render(request, 'assignment.html',
+                          {"assignment": curr_assignment,
+                           "assignment_id": assignment_id,
+                           "submission": submission,
+                           "is_student": True,
+                           "is_ta": False,
+                           "past_due": past_due,
+                           "has_submission": has_submission,
+                           "graded": graded,
+                           "score": score,
+                           "percent": percent,
+                           "error": error})
                 else:
                     return HttpResponseBadRequest
             else:
@@ -93,8 +107,14 @@ def is_student(user):
 def is_ta(user):
     return user.groups.filter(name="Teaching Assistants").exists() or user.is_superuser
 
+
 def submit_assignment(request, curr_assignment, submission, author):
     file = request.FILES['file']
+    max_size = 64 * 1024 * 1024
+    if file.size > max_size:
+        return "file size too large"
+    if not is_pdf(file):
+        return "File type not supported"
     if submission is None:
         grader = pick_grader(curr_assignment)
         new_sub = models.Submission.objects.create(assignment=curr_assignment, author=author, grader=grader, score = None, file = file)
@@ -104,6 +124,8 @@ def submit_assignment(request, curr_assignment, submission, author):
         submission.file = file
         submission.full_clean()
         submission.save()
+    return None
+
 
 @login_required
 def submissions(request, assignment_id):
@@ -188,21 +210,26 @@ def profile(request):
         return render(request, 'profile.html', {'assignments_info': assignments_info,
                                                 'user': request.user, 'is_student': is_s})
     elif is_s:
-        if user.is_anonymous:
-            for inner_assignment in assignments:
-                grade_set = models.User.objects.get(username="g").graded_set.filter(assignment=inner_assignment)
-                num_to_grade = grade_set.count()
-                graded = grade_set.filter(score__isnull=False).count()
-                assignments_info.append([inner_assignment.title, num_to_grade, graded])
-            return render(request, 'profile.html', {'assignments_info': assignments_info,
-                                                    'user': request.user, 'is_student': is_s})
+        current_time = timezone.now()
+        total_possible_points = 0
+        total_points = 0
         for inner_assignment in assignments:
             grade_set = user.author_set.filter(assignment=inner_assignment)
-            assignments_info.append([inner_assignment.title, grade_set, get_student_score(grade_set, inner_assignment)])
+            if current_time > inner_assignment.deadline:
+                if  grade_set.count() > 0:
+                    score = grade_set[0].score
+                    if score is not None: ##assignment graded
+                        total_points += score
+                        total_possible_points += inner_assignment.points
+                else: ##assignment missing
+                    total_points += 0
+                    total_possible_points += inner_assignment.points
+            assignments_info.append([inner_assignment.title, get_student_score_percent(grade_set, inner_assignment)])
+        final_percent = round(total_points / total_possible_points * 100, 2)
         return render(request, 'profile.html', {'assignments_info': assignments_info,
-                                                'user': request.user, 'is_student': is_s})
+                                                'user': request.user, 'is_student': is_s, 'final_percent': final_percent})
 
-def get_student_score(grade_set, assign):
+def get_student_score_percent(grade_set, assign):
     current_time = timezone.now()
     if grade_set.count() == 0:
         if current_time > assign.deadline:
@@ -214,7 +241,7 @@ def get_student_score(grade_set, assign):
         if score is None:
             return "Ungraded"
         else:
-            return str(score)
+            return str(score/assign.points * 100) + "%"
 
 
 def login_form(request):
@@ -237,10 +264,22 @@ def login_form(request):
     return render(request, 'login.html',{"next_page": next_page})
 
 
+def is_pdf(file):
+    if not next(file.chunks()).startswith(b'%PDF-') or not file.name.lower().endswith('.pdf'):
+        return False
+    return True
+
+
 @login_required
 def show_upload(request, filename):
     submission = models.Submission.objects.get(file=filename)
-    return HttpResponse(submission.file.open())
+    file = submission.view_submission(request.user)
+    if is_pdf(file):
+        response = HttpResponse(file.open(), content_type="application/pdf")
+        response['Content-Disposition'] = 'attachment; filename="%s"' % filename
+        return response
+    else:
+        raise Http404
 
 
 def logout_form(request):

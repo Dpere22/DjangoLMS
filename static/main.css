@@ -1,6 +1,15 @@
 @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:ital,wght@0,400;0,700;1,400&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono&display=swap');
+/* HW5 Changes Here */
+tfoot
+{
+    tr {
+        td {
+            font-weight: bold;
+        }
 
+    }
+}
 /* HW4 Changes Here */
 output
 {

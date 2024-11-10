@@ -1,6 +1,8 @@
 from django.core.exceptions import ValidationError, PermissionDenied
 from django.db import models
 from django.contrib.auth.models import User, Group
+from django.template.defaultfilters import filesizeformat
+
 
 def is_positive(n):
     if n >= 0:
@@ -24,5 +26,10 @@ class Submission(models.Model):
     def change_grade(self, user, grade):
         if user == self.grader:
             self.score = grade
+        else:
+            raise PermissionDenied
+    def view_submission(self, user):
+        if user == self.grader or user == self.author or user.is_superuser:
+            return self.file
         else:
             raise PermissionDenied
