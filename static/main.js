@@ -9,16 +9,16 @@ $( ".sortable" ).on("click", (e) => {
     let header = $(e.target);
     let tbl = header.closest("table");
 
-    tbl.find(".sortable").not(header).removeClass("sort-asc sort-desc").addClass("unsorted");
+    tbl.find(".sortable").not(header).removeClass("sort-asc sort-desc").addClass("unsorted").attr("aria-sort", "none");
 
     if (header.hasClass("unsorted")) {
-        header.removeClass("unsorted").addClass("sort-asc");
+        header.removeClass("unsorted").addClass("sort-asc").attr("aria-sort", "ascending");
     }
     else if (header.hasClass("sort-desc")) {
-        header.removeClass("sort-desc").addClass("unsorted");
+        header.removeClass("sort-desc").addClass("unsorted").attr("aria-sort", "none");
     }
     else {
-        header.removeClass("sort-asc").addClass("sort-desc");
+        header.removeClass("sort-asc").addClass("sort-desc").attr("aria-sort", "descending");
     }
 
     make_table_sortable(header);
@@ -36,7 +36,7 @@ function make_table_sortable(header){
         rows.sort((rowA, rowB) => {
             let indexA = parseInt($(rowA).attr("data-index"), 10) || 0;
             let indexB = parseInt($(rowB).attr("data-index"), 10) || 0;
-            return indexA - indexB; // Ascending order based on data-index
+            return indexA - indexB;
         })
     }
     else {
