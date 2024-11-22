@@ -30,11 +30,11 @@
         {% if is_student %}
             <tbody>
                 {% for assignment_info in assignments_info %}
-                    <tr>
+                    <tr data-index={{ forloop.counter }}>
                         <td>
                             <a href="/{{ forloop.counter }}/"> {{ assignment_info.0 }} </a>
                         </td>
-                        <td class = "num-right-align">
+                        <td class = "num-right-align" data-index={{ assignment_info.1 }}>
                             {{ assignment_info.1 }}
                         </td>
                     </tr>
@@ -53,11 +53,11 @@
         {% elif not is_student %}
             <tbody>
                 {% for assignment_info in assignments_info %}
-                    <tr>
+                    <tr data-index={{ forloop.counter }}>
                         <td>
                             <a href=/{{ forloop.counter }}/submissions>{{ assignment_info.0 }}</a>
                         </td>
-                        <td class = "num-right-align">
+                        <td class = "num-right-align" data-index="{{ assignment_info.2 }}/{{ assignment_info.1 }}">
                             {{ assignment_info.2 }}/{{ assignment_info.1 }}
                         </td>
                     </tr>

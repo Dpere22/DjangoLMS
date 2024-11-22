@@ -7,39 +7,58 @@ say_hi($("h1"));
 
 $( ".sortable" ).on("click", (e) => {
     let header = $(e.target);
-    if(header.hasClass("unsorted") || header.hasClass("sort-desc")) {
-        header.removeClass( "unsorted sort-desc" ).addClass( "sort-asc" );
-    }
-    else{
-        header.removeClass( "sort-asc" ).addClass( "sort-desc" );
-    }
     let tbl = header.closest("table");
-    make_table_sortable(tbl);
+
+    tbl.find(".sortable").not(header).removeClass("sort-asc sort-desc").addClass("unsorted");
+
+    if (header.hasClass("unsorted")) {
+        header.removeClass("unsorted").addClass("sort-asc");
+    }
+    else if (header.hasClass("sort-desc")) {
+        header.removeClass("sort-desc").addClass("unsorted");
+    }
+    else {
+        header.removeClass("sort-asc").addClass("sort-desc");
+    }
+
+    make_table_sortable(header);
 });
 
-function make_table_sortable(tbl){
+
+function make_table_sortable(header){
     console.log("make it here");
-    let rows = tbl.find("tbody tr").toArray();
-    let sortableElement = $(tbl.find(".sortable"));
+    let table = header.closest("table");
+    let rows = table.find("tbody tr").toArray();
+    let sortableElement = header;
+    let columnIndex = sortableElement.index();
 
-    rows.sort((rowA, rowB) => {
-        let textA = $(rowA).find("td:last").text().trim().toLowerCase();
-        let textB = $(rowB).find("td:last").text().trim().toLowerCase();
+    if(sortableElement.hasClass( "unsorted" )){
+        rows.sort((rowA, rowB) => {
+            let indexA = parseInt($(rowA).attr("data-index"), 10) || 0;
+            let indexB = parseInt($(rowB).attr("data-index"), 10) || 0;
+            return indexA - indexB; // Ascending order based on data-index
+        })
+    }
+    else {
+        rows.sort((rowA, rowB) => {
+            let cellA = $(rowA).children().eq(columnIndex);
+            let cellB = $(rowB).children().eq(columnIndex);
+            let textA = cellA.text().trim().toLowerCase();
+            let textB = cellB.text().trim().toLowerCase();
 
-        // Convert text to values for comparison
-        let valueA = textA === "missing" ? Number.NEGATIVE_INFINITY
-                    : textA === "ungraded" ? Number.MIN_SAFE_INTEGER
-                    : parseFloat(textA) || 0;
-        let valueB = textB === "missing" ? Number.NEGATIVE_INFINITY
-                    : textB === "ungraded" ? Number.MIN_SAFE_INTEGER
-                    : parseFloat(textB) || 0;
-        if(sortableElement.hasClass( "sort-desc" )) {
-            return valueA - valueB;
-        }
-        else{
-            return valueB - valueA;
-        }
-    });
+            let valueA = textA === "missing" ? Number.NEGATIVE_INFINITY
+                        : textA === "ungraded" ? Number.MIN_SAFE_INTEGER
+                        : parseFloat(cellA.attr("data-value")) || 0;
 
-    tbl.find("tbody").append(rows);
+            let valueB = textB === "missing" ? Number.NEGATIVE_INFINITY
+                        : textB === "ungraded" ? Number.MIN_SAFE_INTEGER
+                        : parseFloat(cellB.attr("data-value")) || 0;
+            if (sortableElement.hasClass("sort-desc")) {
+                return valueA - valueB;
+            } else {
+                return valueB - valueA;
+            }
+        });
+    }
+    table.find("tbody").append(rows);
 }

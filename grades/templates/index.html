@@ -9,24 +9,25 @@
         <div class = "title">
             <h1> All assignments </h1>
         </div>
+
         <table>
             <thead>
                 <tr>
                     <th>Assignment</th>
-                    <th class = "num-right-align">Due date</th>
-                    <th class = "num-right-align">Weight</th>
+                    <th class = "num-right-align sortable unsorted">Due date</th>
+                    <th class = "num-right-align sortable unsorted">Weight</th>
                 </tr>
             </thead>
             <tbody>
                 {%  for assignment in assignments %}
-                    <tr>
+                    <tr  data-value={{ forloop.counter }}>
                         <td>
                             <a href = {{ forloop.counter }}>{{ assignment.title }}</a>
                         </td>
-                        <td class = "num-right-align">
+                        <td class = "num-right-align" data-value = {{ assignment.deadline|date:"U" }}>
                             {{ assignment.deadline|date:"M d" }}
                         </td>
-                        <td class = "num-right-align">
+                        <td class = "num-right-align" data-value = {{ assignment.weight }}>
                             {{ assignment.weight }}
                         </td>
                     </tr>
