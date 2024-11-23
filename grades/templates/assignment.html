@@ -32,13 +32,13 @@
                 {% endif %}
             </p>
         {% if not past_due %}
-            <form enctype="multipart/form-data" action="/{{ assignment_id }}/" method="post">
+            <form class = "shouldAsync" enctype="multipart/form-data" action="/{{ assignment_id }}/" method="post">
                 {% csrf_token %}
                 <div>
                     <label for="file">Submit Assignment: </label>
                     <input name="file" type="file" accept="application/pdf">
                 </div>
-                <button>submit</button>
+                <button class="assignmentSubmit">submit</button>
             </form>
         {% endif %}
         <output>{{ error }}</output>

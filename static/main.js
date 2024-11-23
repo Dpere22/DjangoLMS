@@ -62,3 +62,42 @@ function make_table_sortable(header){
     }
     table.find("tbody").append(rows);
 }
+
+$('.shouldAsync').ready((event)=> {
+    let $forms = $('form.shouldAsync')
+    if($forms.length) {
+        let form = $(event.target).closest("form");
+        make_form_async(form);
+    }
+});
+
+function make_form_async(jForm){
+    $( ".shouldAsync" ).on( "submit", function( event ) {
+        let jForm = $(event.target).closest("form");
+        event.preventDefault();
+        if (!(jForm instanceof jQuery)) {
+            console.error('The parameter is not a jQuery-wrapped form.');
+            return;
+        }
+        let formData = new FormData(jForm[0]);
+        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+        $.ajax({
+            headers: {'X-CSRFToken': csrfToken},
+            method: "POST",
+            url: jForm.attr("action"),
+            data: formData,
+            type: "POST",
+            processData: false,
+            contentType: false,
+            mimeType: jForm.attr("enctype"),
+            success: () => {
+                jForm.replaceWith('<p> Upload succeeded </p>');
+            },
+            error: () => {
+                jForm.find('input, button').prop("disabled", true);
+                console.log("Form Submission Failed");
+            }
+        });
+        jForm.find('input, button').prop("disabled", true);
+    });
+}
