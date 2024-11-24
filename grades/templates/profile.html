@@ -14,7 +14,7 @@
             <a href="/profile/logout/" role="button">Log out</a>
         </div>
 
-        <table>
+        <table {% if is_student %} class="hypothesize" {% endif %}>
             <thead>
                 <tr>
                     <th>Assignment</th>
@@ -34,7 +34,7 @@
                         <td>
                             <a href="/{{ forloop.counter }}/"> {{ assignment_info.0 }} </a>
                         </td>
-                        <td class = "num-right-align" data-index={{ assignment_info.1 }}>
+                        <td class = "num-right-align" data-index="{{ assignment_info.1 }}" data-weight={{ assignment_info.2 }}>
                             {{ assignment_info.1 }}
                         </td>
                     </tr>

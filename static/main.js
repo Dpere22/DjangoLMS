@@ -101,3 +101,110 @@ function make_form_async(jForm){
         jForm.find('input, button').prop("disabled", true);
     });
 }
+
+$(document).ready((event)=> {
+    let $h = $('.hypothesize')
+    if($h.length) {
+        make_grade_hypothesized($h);
+    }
+});
+
+function make_grade_hypothesized(jTable){
+    console.log("made it to hypothesize");
+    if (!(jTable instanceof jQuery)) {
+        console.error('The parameter is not a jQuery-wrapped form.');
+    }
+    let $button = $('<button>')
+        .text('Hypothesize') // Set the button's text
+        .on('click', function() {
+            // Define what happens when the button is clicked
+            if (jTable.hasClass("hypothesized")) {
+                // If hypothesized is true, revert inputs back to <td> elements
+                jTable.removeClass("hypothesized");
+                console.log("should change back")
+                jTable.find('input').each(function() {
+                    const $input = $(this);
+                    const originalText = $input.data('original-text'); // Retrieve the stored original text
+                    // Replace the input with a <td> containing the original text
+                    $input.closest('td').text(originalText);
+                });
+                computeGrade(jTable)
+            }
+            else{
+                console.log("should become inputs")
+                jTable.addClass("hypothesized")
+                $button.text("Actual Grades")
+                jTable.find('td').each(function() {
+                    const $td = $(this);
+                    const text = $td.text().trim(); // Get and trim the text content
+                    // Check if the text matches "ungraded" or "not due"
+                    if (text === 'Ungraded' || text === 'Not Due') {
+                        // Create an input element with the original text stored in data
+                        const $input = $('<input>')
+                            .data('original-text', text).attr('data-weight', $td.attr('data-weight')); // Store the original text using data
+                        // Replace the <td> content with the input
+                        $td.empty().append($input);
+                    }
+                });
+                computeGrade(jTable)
+            }
+
+        });
+
+    // Add the button before the table
+    jTable.before($button);
+}
+
+$(document).ready(function () {
+    // Attach a keyup event listener to all input elements inside tables with the "hypothesize" class
+    $(document).on('keyup', 'table.hypothesize input', function () {
+        const $table = $(this).closest('table'); // Find the closest table containing the input
+        computeGrade($table); // Call computeGrade for the table
+    });
+});
+
+function computeGrade(jTable){
+    console.log("computing!")
+    let totalWeightedGrade = 0; // Sum of weighted grades
+    let totalWeight = 0; // Sum of weights
+
+    // Iterate through each row in the table body
+    jTable.find('tbody tr').each(function() {
+        const $row = $(this);
+        const $lastElement = $row.find('td:last, input:last'); // Find the last element in the row
+
+        let grade = 0;
+        let weight = parseFloat($lastElement.attr('data-weight')) || 0; // Get the weight or default to 0
+
+        // Get the grade from the element
+        if ($lastElement.is('input')) {
+            let input = $($lastElement.find('input'));
+            let value = input.val();
+            grade = parseFloat(value);
+        } else if ($lastElement.is('td')) {
+            const text = $lastElement.text().trim();
+            if (text === 'Missing') {
+                grade = 0; // Treat "Missing" as a grade of 0
+            } else {
+                grade = parseFloat(text); // Try to parse the number
+            }
+        }
+
+        // Check if the grade is a valid number
+        if (!isNaN(grade) && weight > 0) {
+            totalWeightedGrade += grade * (weight / 100); // Add the weighted grade
+            totalWeight += weight; // Add the weight to the total
+        }
+    });
+
+    // Calculate the final grade
+    const finalGrade = totalWeight > 0 ? (totalWeightedGrade / (totalWeight / 100)).toFixed(2) : 'N/A';
+
+    // Update the last <td> in the <tfoot> with the final grade
+    const $tfootLastTd = jTable.find('tfoot td:last');
+    if ($tfootLastTd.length > 0) {
+        $tfootLastTd.text(finalGrade + "%");
+    } else {
+        console.error('No <tfoot> with a last <td> found in the table.');
+    }
+}

@@ -224,7 +224,7 @@ def profile(request):
                 else: ##assignment missing
                     total_points += 0
                     total_possible_points += inner_assignment.points
-            assignments_info.append([inner_assignment.title, get_student_score_percent(grade_set, inner_assignment)])
+            assignments_info.append([inner_assignment.title, get_student_score_percent(grade_set, inner_assignment), inner_assignment.weight])
         final_percent = round(total_points / total_possible_points * 100, 2)
         return render(request, 'profile.html', {'assignments_info': assignments_info,
                                                 'user': request.user, 'is_student': is_s, 'final_percent': final_percent})
