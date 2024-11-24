@@ -117,15 +117,12 @@ function make_grade_hypothesized(jTable){
     let $button = $('<button>')
         .text('Hypothesize') // Set the button's text
         .on('click', function() {
-            // Define what happens when the button is clicked
             if (jTable.hasClass("hypothesized")) {
-                // If hypothesized is true, revert inputs back to <td> elements
                 jTable.removeClass("hypothesized");
                 console.log("should change back")
                 jTable.find('input').each(function() {
                     const $input = $(this);
-                    const originalText = $input.data('original-text'); // Retrieve the stored original text
-                    // Replace the input with a <td> containing the original text
+                    const originalText = $input.data('original-text');
                     $input.closest('td').text(originalText);
                 });
                 computeGrade(jTable)
@@ -136,13 +133,10 @@ function make_grade_hypothesized(jTable){
                 $button.text("Actual Grades")
                 jTable.find('td').each(function() {
                     const $td = $(this);
-                    const text = $td.text().trim(); // Get and trim the text content
-                    // Check if the text matches "ungraded" or "not due"
+                    const text = $td.text().trim();
                     if (text === 'Ungraded' || text === 'Not Due') {
-                        // Create an input element with the original text stored in data
                         const $input = $('<input>')
-                            .data('original-text', text).attr('data-weight', $td.attr('data-weight')); // Store the original text using data
-                        // Replace the <td> content with the input
+                            .data('original-text', text).attr('data-weight', $td.attr('data-weight'));
                         $td.empty().append($input);
                     }
                 });
@@ -156,19 +150,17 @@ function make_grade_hypothesized(jTable){
 }
 
 $(document).ready(function () {
-    // Attach a keyup event listener to all input elements inside tables with the "hypothesize" class
     $(document).on('keyup', 'table.hypothesize input', function () {
-        const $table = $(this).closest('table'); // Find the closest table containing the input
-        computeGrade($table); // Call computeGrade for the table
+        const $table = $(this).closest('table');
+        computeGrade($table);
     });
 });
 
 function computeGrade(jTable){
     console.log("computing!")
-    let totalWeightedGrade = 0; // Sum of weighted grades
-    let totalWeight = 0; // Sum of weights
+    let totalWeightedGrade = 0;
+    let totalWeight = 0;
 
-    // Iterate through each row in the table body
     jTable.find('tbody tr').each(function() {
         const $row = $(this);
         const $lastElement = $row.find('td:last, input:last'); // Find the last element in the row
@@ -176,7 +168,6 @@ function computeGrade(jTable){
         let grade = 0;
         let weight = parseFloat($lastElement.attr('data-weight')) || 0; // Get the weight or default to 0
 
-        // Get the grade from the element
         if ($lastElement.is('input')) {
             let input = $($lastElement.find('input'));
             let value = input.val();
@@ -197,7 +188,6 @@ function computeGrade(jTable){
         }
     });
 
-    // Calculate the final grade
     const finalGrade = totalWeight > 0 ? (totalWeightedGrade / (totalWeight / 100)).toFixed(2) : 'N/A';
 
     // Update the last <td> in the <tfoot> with the final grade
