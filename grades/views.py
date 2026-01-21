@@ -264,22 +264,37 @@ def login_form(request):
     return render(request, 'login.html',{"next_page": next_page})
 
 
-def is_pdf(file):
-    if not next(file.chunks()).startswith(b'%PDF-') or not file.name.lower().endswith('.pdf'):
-        return False
-    return True
+def get_file_type(file):
+    """Returns file type or None if unsupported"""
+    filename = file.name.lower()
+
+    if filename.endswith('.pdf'):
+        first_chunk = next(file.chunks())
+        if first_chunk.startswith(b'%PDF-'):
+            return 'pdf'
+    elif filename.endswith('.txt'):
+        return 'txt'
+
+    return None
 
 
 @login_required
 def show_upload(request, filename):
     submission = models.Submission.objects.get(file=filename)
     file = submission.view_submission(request.user)
-    if is_pdf(file):
+
+    file_type = get_file_type(file)
+
+    if file_type == 'pdf':
         response = HttpResponse(file.open(), content_type="application/pdf")
-        response['Content-Disposition'] = 'attachment; filename="%s"' % filename
+        response['Content-Disposition'] = 'inline; filename="%s"' % filename
+        return response
+    elif file_type == 'txt':
+        response = HttpResponse(file.open(), content_type="text/plain; charset=utf-8")
+        response['Content-Disposition'] = 'inline; filename="%s"' % filename
         return response
     else:
-        raise Http404
+        return redirect("/profile/login/")
 
 
 def logout_form(request):
